@@ -39,43 +39,8 @@ public class NullStoryReporterBehaviour {
             }
 
         };
-        narrateAnInterestingStory(reporter);
+        StoryNarrator.narrateAnInterestingStory(reporter, false);
         assertThat(out.toString(), Matchers.equalTo("beforeStory" + NL + "afterStory" + NL));
-    }
-
-
-    private void narrateAnInterestingStory(StoryReporter reporter) {
-        Story story = new Story("/path/to/story", new Description("An interesting story"), new Narrative(
-                "renovate my house", "customer", "get a loan"), new ArrayList<Scenario>());
-        reporter.dryRun();
-        reporter.beforeStory(story, false);
-
-        // successful scenario
-        reporter.beforeScenario("A successful scenario");
-        reporter.successful("Given I have a balance of $50");
-        reporter.ignorable("!-- A comment");
-        reporter.successful("When I request $20");
-        reporter.successful("When I ask Liz for a loan of $100");
-        reporter.afterScenario();
-
-        // failing scenario
-        reporter.beforeScenario("A failing scenario");
-        OutcomesTable outcomesTable = new OutcomesTable();
-        outcomesTable.addOutcome("I don't return all", 100.0, equalTo(50.));
-        try {
-            outcomesTable.verify();
-        } catch (UUIDExceptionWrapper e) {
-            reporter.failedOutcomes("Then I don't return loan", ((OutcomesFailed) e.getCause()).outcomesTable());
-        }
-        reporter.pending("Then I should have a balance of $30");
-        reporter.notPerformed("Then I should have $20");
-        ExamplesTable table = new ExamplesTable("|money|to|\n|$30|Mauro|\n|$50|Paul|\n");
-        reporter.beforeExamples(asList("Given money <money>", "Then I give it to <to>"), table);
-        reporter.example(table.getRow(0));
-        reporter.example(table.getRow(1));
-        reporter.afterExamples();
-        reporter.afterScenario();
-        reporter.afterStory(false);
     }
 
 }

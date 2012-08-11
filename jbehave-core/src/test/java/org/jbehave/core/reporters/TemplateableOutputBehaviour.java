@@ -1,8 +1,12 @@
 package org.jbehave.core.reporters;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -39,7 +43,7 @@ public class TemplateableOutputBehaviour {
         StoryReporter reporter = new HtmlTemplateOutput(file, new LocalizedKeywords());
 
         // When
-        narrateAnInterestingStory(reporter, true);
+        StoryNarrator.narrateAnInterestingStory(reporter, true);
 
         // Then
         String expected = IOUtils.toString(new FileReader(new File("src/test/resources/story.html")));
@@ -54,7 +58,7 @@ public class TemplateableOutputBehaviour {
         StoryReporter reporter = new XmlTemplateOutput(file, new LocalizedKeywords());
 
         // When
-        narrateAnInterestingStory(reporter, true);
+        StoryNarrator.narrateAnInterestingStory(reporter, true);
 
         // Then
         String expected = IOUtils.toString(new FileReader(new File("src/test/resources/story.xml")));
@@ -63,75 +67,6 @@ public class TemplateableOutputBehaviour {
         // will throw SAXException if the xml file is not well-formed
         XMLUnit.buildTestDocument(out);
         assertThatOutputIs(out, expected);
-    }
-
-    public static void narrateAnInterestingStory(StoryReporter reporter, boolean withFailure) {
-        Properties meta = new Properties();
-        meta.setProperty("theme", "testing");
-        meta.setProperty("author", "Mauro");
-        Story story = new Story("/path/to/story", new Description("An interesting story"), new Meta(meta),
-                new Narrative("renovate my house", "customer", "get a loan"), new ArrayList<Scenario>());
-        boolean givenStory = false;
-        reporter.dryRun();
-        reporter.beforeStory(story, givenStory);
-        reporter.narrative(story.getNarrative());
-        reporter.beforeScenario("I ask for a loan");
-        reporter.givenStories(asList("/given/story1", "/given/story2"));
-        reporter.successful("Given I have a balance of $50");
-        reporter.ignorable("!-- A comment");
-        reporter.successful("When I request $20");
-        reporter.successful("When I ask Liz for a loan of $100");
-        reporter.successful("When I ask Liz for a loan of $"+StepCreator.PARAMETER_VALUE_START+"99"+StepCreator.PARAMETER_VALUE_END);
-        reporter.successful("When I write special chars <>&\"");
-        reporter.successful("When I write special chars in a parameter "+StepCreator.PARAMETER_VALUE_START+"<>&\""+StepCreator.PARAMETER_VALUE_END);
-        reporter.successful("When I write two parameters "
-                + StepCreator.PARAMETER_VALUE_START+",,,"+StepCreator.PARAMETER_VALUE_END
-                + " and "
-                + StepCreator.PARAMETER_VALUE_START+"&&&"+StepCreator.PARAMETER_VALUE_END);
-        reporter.restarted("Then I should... - try again", new RestartingScenarioFailure("hi"));
-        if (withFailure) {
-            reporter.failed("Then I should have a balance of $30", new Exception("Expected <30> got <25>"));
-        } else {
-            reporter.pending("Then I should have a balance of $30");
-        }
-        reporter.notPerformed("Then I should have $20");
-        OutcomesTable outcomesTable = new OutcomesTable();
-        outcomesTable.addOutcome("I don't return all", 100.0, equalTo(50.));
-        try {
-            outcomesTable.verify();
-        } catch (UUIDExceptionWrapper e) {
-            reporter.failedOutcomes("Then I don't return loan", ((OutcomesFailed) e.getCause()).outcomesTable());
-        }
-        reporter.afterScenario();
-        reporter.beforeScenario("Parametrised Scenario");
-        ExamplesTable table = new ExamplesTable("|money|to|\n|$30|Mauro|\n|$50|Paul|\n");
-        reporter.beforeExamples(asList("Given money <money>", "Then I give it to <to>"), table);
-        reporter.example(table.getRow(0));
-        reporter.successful("Given money $30");
-        reporter.successful("Then I give it to Mauro");
-        reporter.example(table.getRow(1));
-        reporter.successful("Given money $50");
-        reporter.successful("Then I give it to Paul");
-        if (withFailure) {
-            reporter.failed("Then I should have a balance of $30", new Exception("Expected <30> got <25>"));
-        } else {
-            reporter.pending("Then I should have a balance of $30");
-        }
-        reporter.afterExamples();
-        reporter.afterScenario();
-        reporter.storyCancelled(story, new StoryDuration(2, 1));
-        String method1="@When(\"something \\\"$param\\\"\")\n"
-                + "@Pending\n"
-                + "public void whenSomething() {\n"
-                + "  // PENDING\n"
-                + "}\n";
-        String method2="@Then(\"something is <param1>\")\n"
-                + "@Pending\n"
-                + "public void thenSomethingIsParam1() {\n"
-                + "  // PENDING\n"
-                + "}\n";
-        reporter.pendingMethods(asList(method1, method2));
-        reporter.afterStory(givenStory);
     }
 
     private void assertThatOutputIs(String out, String expected) {

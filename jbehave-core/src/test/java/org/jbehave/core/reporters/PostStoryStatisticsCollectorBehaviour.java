@@ -74,7 +74,7 @@ public class PostStoryStatisticsCollectorBehaviour {
     @Test
     public void shouldCollectStoryStatisticsWhenStoryNotAllowedByFilter() {
         // When
-        narrateAnInterestingStoryNotAllowedByFilter(true);
+        StoryNarrator.narrateAnInterestingStoryNotAllowedByFilter(reporter, true);
 
         // Then
         String statistics = out.toString();
@@ -84,7 +84,7 @@ public class PostStoryStatisticsCollectorBehaviour {
     @Test
     public void shouldCollectStoryStatisticsWhenScenariosNotAllowedByFilter() {
         // When
-        narrateAnInterestingStoryNotAllowedByFilter(false);
+        StoryNarrator.narrateAnInterestingStoryNotAllowedByFilter(reporter, false);
         
         // Then
         String statistics = out.toString();
