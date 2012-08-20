@@ -19,7 +19,7 @@ public class JBehaveInputMetric extends InputMetricXSL {
 
     @Override
     public String getToolVersion() {
-        return "3.x";
+        return "3.x/4.x";
     }
 
     @Override
