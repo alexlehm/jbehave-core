@@ -43,7 +43,7 @@ public class MetaFilterBehaviour {
     public void shouldFilterByNameOnly() {
         assertFilterAllowsProperty("-skip", "skip", false);
     }
-    
+
     @Test
     public void shouldFilterWithBothIncludeAndExclude() {
         assertFilterAllowsProperty("+theme smoke testing -skip", "theme smoke testing", true);
@@ -76,7 +76,7 @@ public class MetaFilterBehaviour {
     private void assertFilterAllowsProperty(String filter, String property, boolean allowed) {
         assertThat(filter(filter).allow(new Meta(asList(property))), equalTo(allowed));
     }
-    
+
     @Test
     public void shouldFilterByAdditiveBooleanExpressionsUsingGroovy() {
         MetaFilter filter = filter("groovy: (a == '11' | a == '22') && b == '33'");
@@ -125,7 +125,7 @@ public class MetaFilterBehaviour {
         for (int i = 0; i < 1000; i++) {
             assertFalse(filter.allow(metaBuilder.clear().a(11).b(33).build()));
         }
-        assertTrue("should be less than half a second for 1000 matches on a simple case", System.currentTimeMillis() - start < 500);
+        assertTrue("should be less than a second for 1000 matches on a simple case", System.currentTimeMillis() - start < 1000);
     }
 
     private MetaFilter filter(String filterAsString) {
